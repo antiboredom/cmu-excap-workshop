@@ -1,5 +1,7 @@
 from scenedetect import ContentDetector, detect
 from moviepy.editor import VideoFileClip, concatenate_videoclips
+import json
+import os
 from PIL import Image
 from transformers import pipeline
 
@@ -38,6 +40,11 @@ def split_by_time(video, inc=0.5):
 
 
 def label_scenes(videofile, scenes, labels):
+    jsonname = videofile + ".zeroshotclassifier.json"
+    if os.path.exists(jsonname):
+        with open(jsonname, "r") as infile:
+            out = json.load(infile)
+        return out
     out = []
     video = VideoFileClip(videofile)
     for scene in scenes:
@@ -60,6 +67,10 @@ def label_scenes(videofile, scenes, labels):
             "score": results[0]["score"],
         }
         out.append(item)
+
+    with open(jsonname, "w") as outfile:
+        json.dump(out, outfile, indent=2)
+
     return out
 
 

@@ -1,5 +1,7 @@
 from scenedetect import ContentDetector, detect
 from moviepy.editor import VideoFileClip, concatenate_videoclips
+import os
+import json
 from PIL import Image
 from transformers import pipeline
 
@@ -35,6 +37,11 @@ def split_by_time(video, inc=0.5):
 
 
 def label_scenes(videofile, scenes):
+    jsonname = videofile + ".classifier.json"
+    if os.path.exists(jsonname):
+        with open(jsonname, "r") as infile:
+            out = json.load(infile)
+        return out
     out = []
     video = VideoFileClip(videofile)
     for scene in scenes:
@@ -57,6 +64,8 @@ def label_scenes(videofile, scenes):
             "labels": results,
         }
         out.append(item)
+    with open(jsonname, "w") as outfile:
+        json.dump(out, outfile, indent=2)
     return out
 
 
